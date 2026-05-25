@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Economic Zero Hour</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div id="game-ui">
+      <header id="hud" class="hud">
+        <div class="hud-resources">
+          <span id="res-capital" title="رأس المال">💰 0</span>
+          <span id="res-oil" title="النفط">⛽ 0</span>
+          <span id="res-food" title="الغذاء">🌾 0</span>
+          <span id="res-metals" title="المعادن">💎 0</span>
+        </div>
+        <div id="game-time" class="hud-time">⏱ 00:00</div>
+        <span id="hud-general" class="hud-general">💼 المستثمر الذكي</span>
+        <span id="hud-unit" class="hud-unit">📍 المحلل</span>
+        <button id="trade-toggle" type="button" class="layer-btn active" title="T — خطوط التجارة">
+          تجارة (T)
+        </button>
+        <button id="layer-toggle" type="button" class="layer-btn" title="Tab — الطبقة الخفية">
+          طبقة خفية (Tab)
+        </button>
+      </header>
+      <aside id="region-tracker" class="region-tracker">
+        <p class="trade-legend">
+          <span class="leg player">●</span> لصالحك
+          <span class="leg ai">●</span> للخصم
+          <span class="leg neutral">●</span> محايد
+          <span class="leg severed">●</span> مقطوع
+        </p>
+        <div id="region-list"></div>
+      </aside>
+      <aside id="country-panel" class="country-panel hidden">
+        <h2 id="panel-country-name">—</h2>
+        <p id="panel-region" class="muted"></p>
+        <p id="panel-unit-status" class="unit-status">—</p>
+        <div class="influence-block">
+          <div class="stat-row">
+            <span>أنت</span>
+            <div class="bar-wrap"><div id="panel-player-bar" class="bar-fill player"></div></div>
+            <span id="panel-player-pct">0%</span>
+          </div>
+          <div class="stat-row">
+            <span>خصم</span>
+            <div class="bar-wrap"><div id="panel-ai-bar" class="bar-fill ai"></div></div>
+            <span id="panel-ai-pct">0%</span>
+          </div>
+        </div>
+        <p id="panel-status-tag" class="status-tag"></p>
+        <p id="panel-resource" class="resource-tag"></p>
+        <p id="panel-weakness" class="weakness"></p>
+        <p class="panel-hint">انقر الدولة على الخريطة لفتح قائمة الأوامر الدائرية</p>
+        <button id="panel-close" type="button" class="close-btn">إغلاق</button>
+      </aside>
+      <footer class="bottom-bar">
+        <div id="unit-bar" class="unit-bar">
+          <button type="button" id="btn-unit-analyst" class="unit-chip active">◆ محلل مالي</button>
+          <button type="button" id="btn-unit-advisor" class="unit-chip hidden">◆ مستشار قرض</button>
+          <button type="button" id="btn-recruit-advisor" class="unit-chip recruit">
+            + مستشار قرض (2000💰)
+          </button>
+        </div>
+        <div id="notifications" class="notifications">
+          <span class="toast">مرحباً — 1 محلل | 2 مستشار | عيّن مستشار القرض من الأسفل</span>
+        </div>
+      </footer>
+    </div>
+    <div id="general-picker" class="general-picker">
+      <div class="picker-card">
+        <h1>اختر جنرالك</h1>
+        <p class="picker-sub">Economic Zero Hour — اختر أسلوبك</p>
+        <p class="picker-faction">🏢 الشركات</p>
+        <div class="picker-options">
+          <button type="button" data-general="smart_investor" class="picker-btn">
+            <span class="picker-icon">💼</span>
+            <strong>المستثمر الذكي</strong>
+            <span>استثمار +7% · استحواذ كامل للدولة</span>
+          </button>
+          <button type="button" data-general="tech_king" class="picker-btn">
+            <span class="picker-icon">💻</span>
+            <strong>ملك التكنولوجيا</strong>
+            <span>+9% شمال · الشلل الرقمي للخصم</span>
+          </button>
+          <button type="button" data-general="retail_caesar" class="picker-btn">
+            <span class="picker-icon">🛒</span>
+            <strong>قيصر التجزئة</strong>
+            <span>مصنع +14% · الإغراق الكامل للسوق</span>
+          </button>
+        </div>
+        <p class="picker-faction">🏦 البنوك</p>
+        <div class="picker-options">
+          <button type="button" data-general="debt_hunter" class="picker-btn">
+            <span class="picker-icon">🪤</span>
+            <strong>صياد الديون</strong>
+            <span>قرض +12% · قطع تجارة · الفخ السيادي</span>
+          </button>
+          <button type="button" data-general="market_mover" class="picker-btn">
+            <span class="picker-icon">📉</span>
+            <strong>محرك الأسواق</strong>
+            <span>الانهيار الكبير · +9% مراكز مالية</span>
+          </button>
+          <button type="button" data-general="sovereign_shadow" class="picker-btn">
+            <span class="picker-icon">👤</span>
+            <strong>الظل السيادي</strong>
+            <span>انقلاب هادئ 85% · جنوب +10%</span>
+          </button>
+        </div>
+        <p class="picker-faction">⚡ تكتل الموارد</p>
+        <div class="picker-options">
+          <button type="button" data-general="oil_prince" class="picker-btn">
+            <span class="picker-icon">🛢️</span>
+            <strong>أمير النفط</strong>
+            <span>حزام نفطي +9% · صدمة عالمية · +10⛽/حقل</span>
+          </button>
+          <button type="button" data-general="food_lord" class="picker-btn">
+            <span class="picker-icon">🌾</span>
+            <strong>سيد الغذاء</strong>
+            <span>جنوب +9% · مجاعة إقليمية · +8🌾/حقل</span>
+          </button>
+          <button type="button" data-general="metal_king" class="picker-btn">
+            <span class="picker-icon">💎</span>
+            <strong>ملك المعادن</strong>
+            <span>شمال +9% · حظر كامل · +7💎/منجم</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div id="command-menu" class="command-menu hidden">
+      <div class="command-menu-inner">
+        <div id="command-menu-items" class="command-menu-items"></div>
+        <div id="cmd-center-label" class="cmd-center">—</div>
+      </div>
+    </div>
+    <div id="game-overlay" class="game-overlay hidden">
+      <div class="overlay-card">
+        <h1 id="overlay-title">—</h1>
+        <p id="overlay-message"></p>
+        <div id="overlay-stats" class="overlay-stats"></div>
+        <button type="button" id="overlay-restart" class="overlay-restart">إعادة اللعب</button>
+      </div>
+    </div>
+    <canvas id="renderCanvas"></canvas>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
