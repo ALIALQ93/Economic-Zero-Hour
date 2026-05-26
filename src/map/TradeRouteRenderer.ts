@@ -2,15 +2,15 @@ import { Color3, MeshBuilder, Scene, Vector3, type LinesMesh } from '@babylonjs/
 import type { Country } from './Country';
 import { TRADE_ROUTES, type TradeFlow } from './tradeRoutes';
 
-const LINE_Y = 0.45;
+const LINE_Y = 0.5;
 
 const COLORS: Record<TradeFlow, Color3> = {
-  player: new Color3(0.25, 0.85, 0.35),
-  ai: new Color3(0.9, 0.2, 0.25),
-  neutral: new Color3(0.45, 0.5, 0.55),
+  player: new Color3(0.2, 0.92, 0.42),
+  ai: new Color3(0.95, 0.22, 0.28),
+  neutral: new Color3(0.5, 0.58, 0.65),
 };
 
-const SEVERED_COLOR = new Color3(0.25, 0.25, 0.28);
+const SEVERED_COLOR = new Color3(0.22, 0.22, 0.26);
 
 function getFlowFromCountry(country: Country | undefined): TradeFlow {
   if (!country) return 'neutral';
@@ -31,8 +31,29 @@ function resolveRouteFlow(from: Country | undefined, to: Country | undefined): T
   return 'neutral';
 }
 
+function arcPoints(from: Vector3, to: Vector3, segments = 14): Vector3[] {
+  const a = from.clone();
+  const b = to.clone();
+  a.y = LINE_Y;
+  b.y = LINE_Y;
+  const mid = Vector3.Center(a, b);
+  mid.y += Vector3.Distance(a, b) * 0.12;
+
+  const points: Vector3[] = [];
+  for (let i = 0; i <= segments; i++) {
+    const t = i / segments;
+    const u = 1 - t;
+    points.push(
+      a.scale(u * u).add(mid.scale(2 * u * t)).add(b.scale(t * t)),
+    );
+  }
+  return points;
+}
+
 export class TradeRouteRenderer {
   private lines = new Map<string, LinesMesh>();
+  private flowByRoute = new Map<string, TradeFlow>();
+  private severedRoutes = new Set<string>();
   visible = true;
 
   constructor(
@@ -48,19 +69,15 @@ export class TradeRouteRenderer {
       const to = this.getPosition(route.to);
       if (!from || !to) continue;
 
-      const a = from.clone();
-      const b = to.clone();
-      a.y = LINE_Y;
-      b.y = LINE_Y;
-
       const line = MeshBuilder.CreateLines(
         `trade_${route.id}`,
-        { points: [a, b] },
+        { points: arcPoints(from, to) },
         this.scene,
       );
       line.color = COLORS.neutral;
       line.isPickable = false;
       this.lines.set(route.id, line);
+      this.flowByRoute.set(route.id, 'neutral');
     }
   }
 
@@ -71,12 +88,28 @@ export class TradeRouteRenderer {
 
       if (severed.has(route.id)) {
         line.color = SEVERED_COLOR;
+        this.severedRoutes.add(route.id);
+        this.flowByRoute.set(route.id, 'neutral');
       } else {
+        this.severedRoutes.delete(route.id);
         const from = countries.get(route.from);
         const to = countries.get(route.to);
-        line.color = COLORS[resolveRouteFlow(from, to)];
+        const flow = resolveRouteFlow(from, to);
+        this.flowByRoute.set(route.id, flow);
+        line.color = COLORS[flow];
       }
       line.isVisible = this.visible;
+    }
+  }
+
+  updateAnimation(timeMs: number): void {
+    if (!this.visible) return;
+    const pulse = 0.75 + Math.sin(timeMs * 0.004) * 0.25;
+
+    for (const [routeId, line] of this.lines) {
+      const flow = this.flowByRoute.get(routeId) ?? 'neutral';
+      if (this.severedRoutes.has(routeId)) continue;
+      line.color = COLORS[flow].scale(pulse);
     }
   }
 

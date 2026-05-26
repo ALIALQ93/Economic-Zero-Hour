@@ -43,9 +43,11 @@ export class GameEngine {
     this.engine = new Engine(canvas, true, {
       preserveDrawingBuffer: true,
       stencil: true,
+      antialias: true,
+      powerPreference: 'high-performance',
     });
+    this.engine.setHardwareScalingLevel(1 / Math.min(window.devicePixelRatio, 2));
     this.scene = new Scene(this.engine);
-    this.scene.clearColor.set(0.04, 0.06, 0.1, 1);
 
     this.overlay.onRestart = () => window.location.reload();
     this.generalPicker.onSelect = (id) => this.initGame(id);
@@ -129,7 +131,8 @@ export class GameEngine {
       }
     }
 
-    this.unitRenderer.sync(this.state.units.units);
+    this.worldMap.updateAnimations(delta);
+    this.unitRenderer.sync(this.state.units.units, delta);
     this.unitBar.render(
       this.state.units.getPlayerUnits(),
       this.state.units.selectedUnitId,

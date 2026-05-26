@@ -20,6 +20,8 @@ body {
   display: block;
   touch-action: none;
   outline: none;
+  image-rendering: auto;
+  filter: contrast(1.04) saturate(1.08);
 }
 
 #game-ui {
